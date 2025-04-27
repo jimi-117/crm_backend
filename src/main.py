@@ -9,7 +9,9 @@ from src.database import get_db, engine # get_db 依存関数と engine をイ�
 # 認証モジュール (auth.py) から必要なものをインポート
 from src.auth import create_access_token, verify_password, Token, TokenData, get_current_user, get_admin_user, hash_password
 # アプリケーション起動時にテーブルを作成する (開発・検証用)
-models.Base.metadata.create_all(bind=engine) # 既に実行していればコメントアウト可
+# 開発環境でのみテーブルを作成
+if settings.ENV == "development":
+    models.Base.metadata.create_all(bind=engine)
 
 
 app = FastAPI()
