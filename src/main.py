@@ -9,12 +9,12 @@ from src.database import engine
 
 # ルーターをインポート
 from src.routers import auth, clients, prospects, content_items, users
-from src.config import settings
+# from src.config import settings
 
 # アプリケーション起動時にテーブルを作成する (開発・検証用)
 # 本番環境では Alembic などのマイグレーションツールを使うべき
-if settings.ENV == "development":
-    models.Base.metadata.create_all(bind=engine)
+# if settings.ENV == "development":
+models.Base.metadata.create_all(bind=engine)
 
 # FastAPIアプリケーションを初期化
 app = FastAPI(
