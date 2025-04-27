@@ -5,7 +5,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str
     DATABASE_PASSWORD: str
     ENV: str = "development"  # default to development
-    
+    FRONTEND_ORIGINS: str
     JWT_SECRET_KEY: str = Field(..., description="JWT secret key")
     JWT_ALGORITHM: str = Field(default="HS256", description="JWT argo")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=60, description="Access token expire time in minutes")

@@ -3,7 +3,7 @@ from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Date, Text,
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
-from src.database import Base # database.py から Base をインポート
+from .database import Base # database.py から Base をインポート
 
 # demo_shema.sql の users テーブルに対応
 class User(Base):
