@@ -24,9 +24,10 @@ app = FastAPI(
 )
 
 # CORS設定
-allowed_origins_str = os.getenv("FRONTEND_ORIGINS")
-allowed_origins = [origin.strip() for origin in settings.FRONTEND_ORIGINS.split(',')]
-
+allowed_origins = [
+    "https://crm-frontend-hazel-two.vercel.app/",  # 本番環境
+    "http://localhost:5173",  # ローカル開発環境
+]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
