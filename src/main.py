@@ -34,7 +34,7 @@ app.add_middleware(
 from fastapi.security import OAuth2PasswordRequestForm
 
 # 仮のDBからユーザーを取得する関数を SQLAlchemy を使って再実装
-# ここで models.User を使います
+# ここで models.User を使う
 def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
 

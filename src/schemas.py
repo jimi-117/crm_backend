@@ -1,5 +1,5 @@
 # schemas.py
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import date, datetime
 from typing import Optional
 
@@ -26,12 +26,7 @@ class Client(ClientCreate):
     created_at: datetime
     updated_at: datetime
 
-    # ORM モデルを Pydantic モデルにマッピングするために必要
-    class Config:
-        orm_mode = True # Deprecated: from FastAPI 0.110 onwards, use `model_config = ConfigDict(from_attributes=True)`
-        # 新しいPydanticの書き方 (Pydantic v2以降)
-        # from pydantic import ConfigDict
-        # model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True)
 
 
 # プロスペクト作成時のリクエストボディ用モデル
@@ -53,11 +48,7 @@ class Prospect(ProspectCreate):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
-        # 新しいPydanticの書き方
-        # from pydantic import ConfigDict
-        # model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True)
 
 
 # コンテンツアイテム作成時のリクエストボディ用モデル
@@ -75,11 +66,7 @@ class ContentItem(ContentItemCreate):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
-        # 新しいPydanticの書き方
-        # from pydantic import ConfigDict
-        # model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ユーザー情報のレスポンス用モデル (パスワードなどは含めない)
@@ -93,11 +80,7 @@ class User(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
-        # 新しいPydanticの書き方
-        # from pydantic import ConfigDict
-        # model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True)
 
 # 認証ユーザー情報 (auth.py で定義したものと同じにするか、こちらを正規とする)
 # from auth import TokenData # もし auth.py に既に定義があればそちらを使う
