@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 import src.models as models, src.database as database, src.schemas as schemas
 from src.database import get_db, engine # get_db 依存関数と engine をインポート
 # 認証モジュール (auth.py) から必要なものをインポート
-from src.auth import create_access_token, verify_password, Token, TokenData, get_current_user, get_admin_user, hash_password
+from src.routers.auth import create_access_token, verify_password, Token, TokenData, get_current_user, get_admin_user, hash_password
 # アプリケーション起動時にテーブルを作成する (開発・検証用)
 # 開発環境でのみテーブルを作成
 if settings.ENV == "development":
