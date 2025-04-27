@@ -1,0 +1,17 @@
+name: Deploy Backend to Render
+
+on:
+  push:
+    branches: [main] # executed when pushing to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # deploy using Render hooks
+      # Need to genetate Render hooks, and register them as secrets in the GitHub repository as RENDER_DEPLOY_HOOK_URL
+      - name: Trigger Render Deploy Hook
+        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
