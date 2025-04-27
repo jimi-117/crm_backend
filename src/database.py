@@ -3,11 +3,13 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from .config import get_database_url
+
 
 # 環境変数からデータベースURLを読み込む
 # RenderのManaged PostgreSQLを使う場合、接続URLは環境変数として提供されます。
 # 例: "postgresql://user:password@host:port/dbname"
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5432/mydatabase") # TODO: デフォルト値はローカル環境に合わせて変更してください
+DATABASE_URL = get_database_url() # DONE: デフォルト値はローカル環境に合わせて変更してください
 
 # データベースエンジンを作成
 # connect_args={"check_same_thread": False} は SQLite で必要になる設定ですが、

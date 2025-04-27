@@ -8,11 +8,12 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
+from .config import settings
 
 # 環境変数から秘密鍵などを読み込む (本番では環境変数として設定)
-SECRET_KEY = os.getenv("SECRET_KEY") # デフォルト値は開発用、本番では必ず変更！
-ALGORITHM = "HS256" # 使用するJWTアルゴリズム
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 # アクセストークンの有効期限 (分)
+SECRET_KEY = settings.JWT_SECRET_KEY # デフォルト値は開発用、本番では必ず変更！
+ALGORITHM = settings.JWT_ALGORITHM # 使用するJWTアルゴリズム
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES # アクセストークンの有効期限
 
 # パスワードハッシュ化の設定
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
