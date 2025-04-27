@@ -3,6 +3,7 @@ from typing import Annotated, List
 from fastapi import APIRouter, Depends, HTTPException, status, Path, Query
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import func
 
 from src.database import get_db
 import src.models as models
@@ -163,3 +164,44 @@ def delete_prospect(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Erreur serveur: {str(e)}"
         )
+        
+        
+@router.get("/recommended", response_model=List[schemas.Prospect])
+def get_recommended_prospects(
+    current_user: Annotated[TokenData, Depends(get_current_user)],
+    db: Session = Depends(get_db),
+    limit: int = 3
+):
+    """ユーザーにおすすめのプロスペクトを取得する（高関心度や直近のフォローアップ日などに基づく）"""
+    # 基本クエリの作成
+    query = db.query(models.Prospect)
+    
+    # ユーザーの権限に基づくフィルタリング
+    if current_user.role != "admin":
+        query = query.filter(models.Prospect.user_id == current_user.id)
+    
+    # ステータスが「新規」または「コンタクト済み」でフィルタリング
+    query = query.filter(models.Prospect.status.in_(["new", "contacted"]))
+    
+    # 関心度が「高」のプロスペクトを優先
+    high_interest_prospects = query.filter(
+        models.Prospect.interest_level == "high"
+    ).order_by(models.Prospect.created_at.desc()).limit(limit).all()
+    
+    # 高関心度のプロスペクトが少ない場合、フォローアップ日が近いものも追加
+    if len(high_interest_prospects) < limit:
+        # 既に取得したプロスペクトのIDリスト
+        existing_ids = [p.id for p in high_interest_prospects]
+        
+        # 次のフォローアップ日が近いプロスペクトを追加
+        remaining_needed = limit - len(high_interest_prospects)
+        upcoming_followup_prospects = query.filter(
+            ~models.Prospect.id.in_(existing_ids)
+        ).order_by(models.Prospect.next_follow_up_date).limit(remaining_needed).all()
+        
+        # 結果を結合
+        recommended_prospects = high_interest_prospects + upcoming_followup_prospects
+    else:
+        recommended_prospects = high_interest_prospects
+    
+    return recommended_prospects
