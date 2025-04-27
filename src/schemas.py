@@ -1,7 +1,24 @@
 # schemas.py
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from datetime import date, datetime
-from typing import Optional
+from typing import Optional, List
+
+# ユーザー作成用のリクエストボディモデル
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str = Field(..., min_length=6)
+    role: str = "user"  # デフォルトは通常ユーザー
+    name: str
+    city: str
+
+# ユーザー更新用のリクエストボディモデル
+class UserUpdate(BaseModel):
+    email: Optional[EmailStr] = None
+    password: Optional[str] = Field(None, min_length=6)
+    role: Optional[str] = None
+    name: Optional[str] = None
+    city: Optional[str] = None
+    is_active: Optional[bool] = None
 
 # クライアント作成時のリクエストボディ用モデル
 class ClientCreate(BaseModel):
@@ -11,23 +28,25 @@ class ClientCreate(BaseModel):
     contact_email: Optional[str] = None
     contact_phone: Optional[str] = None
     status: Optional[str] = None
-    # signed_date, estimated_monthly_revenue は契約後に設定される可能性があるので、作成時は含めない設計も考えられます
-    
     signed_date: Optional[date] = None
-    estimated_monthly_revenue: Optional[float] = None # decimal は float で扱う
+    estimated_monthly_revenue: Optional[float] = None  # decimal は float で扱う
 
 # クライアント情報のレスポンス用モデル
-# データベースから取得したORMオブジェクトをこのモデルに変換して返します
-class Client(ClientCreate):
+class Client(BaseModel):
     id: int
     user_id: int
+    name: str
+    company_name: Optional[str] = None
+    business_category: str
+    contact_email: Optional[str] = None
+    contact_phone: Optional[str] = None
+    status: Optional[str] = None
     signed_date: Optional[date] = None
     estimated_monthly_revenue: Optional[float] = None
     created_at: datetime
-    updated_at: datetime
+    updated_at: Optional[datetime] = None
 
     model_config = ConfigDict(from_attributes=True)
-
 
 # プロスペクト作成時のリクエストボディ用モデル
 class ProspectCreate(BaseModel):
@@ -42,32 +61,42 @@ class ProspectCreate(BaseModel):
     notes: Optional[str] = None
 
 # プロスペクト情報のレスポンス用モデル
-class Prospect(ProspectCreate):
+class Prospect(BaseModel):
     id: int
     user_id: int
+    name: str
+    company_name: Optional[str] = None
+    business_category: str
+    contact_email: Optional[str] = None
+    contact_phone: Optional[str] = None
+    interest_level: Optional[str] = None
+    status: str
+    next_follow_up_date: Optional[date] = None
+    notes: Optional[str] = None
     created_at: datetime
-    updated_at: datetime
+    updated_at: Optional[datetime] = None
 
     model_config = ConfigDict(from_attributes=True)
 
-
 # コンテンツアイテム作成時のリクエストボディ用モデル
 class ContentItemCreate(BaseModel):
-    # client_id はパスパラメータなどで受け取る可能性もある
     content_type: str
     title: Optional[str] = None
     description: Optional[str] = None
     instagram_post_url: str
 
 # コンテンツアイテム情報のレスポンス用モデル
-class ContentItem(ContentItemCreate):
+class ContentItem(BaseModel):
     id: int
     client_id: int
+    content_type: str
+    title: Optional[str] = None
+    description: Optional[str] = None
+    instagram_post_url: str
     created_at: datetime
-    updated_at: datetime
+    updated_at: Optional[datetime] = None
 
     model_config = ConfigDict(from_attributes=True)
-
 
 # ユーザー情報のレスポンス用モデル (パスワードなどは含めない)
 class User(BaseModel):
@@ -78,13 +107,6 @@ class User(BaseModel):
     city: str
     is_active: bool
     created_at: datetime
-    updated_at: datetime
+    updated_at: Optional[datetime] = None
 
     model_config = ConfigDict(from_attributes=True)
-
-# 認証ユーザー情報 (auth.py で定義したものと同じにするか、こちらを正規とする)
-# from auth import TokenData # もし auth.py に既に定義があればそちらを使う
-# class TokenData(BaseModel):
-#     id: int | None = None
-#     role: str
-#     city: str | None = None

@@ -68,9 +68,9 @@ def create_client(
 
 @router.get("/{client_id}", response_model=schemas.Client)
 def read_client(
-    client_id: int = Path(..., title="The ID of the client to get"),
     current_user: Annotated[TokenData, Depends(get_current_user)],
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    client_id: int = Path(..., title="The ID of the client to get")
 ):
     """指定したIDのクライアント情報を取得する"""
     client = db.query(models.Client).filter(models.Client.id == client_id).first()
@@ -93,10 +93,10 @@ def read_client(
 
 @router.put("/{client_id}", response_model=schemas.Client)
 def update_client(
-    client_update: schemas.ClientCreate,
-    client_id: int = Path(..., title="The ID of the client to update"),
     current_user: Annotated[TokenData, Depends(get_current_user)],
-    db: Session = Depends(get_db)
+    client_update: schemas.ClientCreate,
+    db: Session = Depends(get_db),
+    client_id: int = Path(..., title="The ID of the client to update")
 ):
     """クライアント情報を更新する"""
     # クライアントの存在確認
@@ -132,9 +132,9 @@ def update_client(
 
 @router.delete("/{client_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_client(
-    client_id: int = Path(..., title="The ID of the client to delete"),
     current_user: Annotated[TokenData, Depends(get_current_user)],
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    client_id: int = Path(..., title="The ID of the client to delete")
 ):
     """クライアントを削除する"""
     # クライアントの存在確認

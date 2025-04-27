@@ -68,8 +68,8 @@ def create_prospect(
 
 @router.get("/{prospect_id}", response_model=schemas.Prospect)
 def read_prospect(
-    prospect_id: int = Path(..., title="The ID of the prospect to get"),
     current_user: Annotated[TokenData, Depends(get_current_user)],
+    prospect_id: int = Path(..., title="The ID of the prospect to get"),
     db: Session = Depends(get_db)
 ):
     """指定したIDのプロスペクト情報を取得する"""
@@ -94,8 +94,8 @@ def read_prospect(
 @router.put("/{prospect_id}", response_model=schemas.Prospect)
 def update_prospect(
     prospect_update: schemas.ProspectCreate,
-    prospect_id: int = Path(..., title="The ID of the prospect to update"),
     current_user: Annotated[TokenData, Depends(get_current_user)],
+    prospect_id: int = Path(..., title="The ID of the prospect to update"),
     db: Session = Depends(get_db)
 ):
     """プロスペクト情報を更新する"""
@@ -132,8 +132,8 @@ def update_prospect(
 
 @router.delete("/{prospect_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_prospect(
-    prospect_id: int = Path(..., title="The ID of the prospect to delete"),
     current_user: Annotated[TokenData, Depends(get_current_user)],
+    prospect_id: int = Path(..., title="The ID of the prospect to delete"),
     db: Session = Depends(get_db)
 ):
     """プロスペクトを削除する"""

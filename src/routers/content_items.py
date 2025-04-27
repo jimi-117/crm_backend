@@ -40,8 +40,8 @@ def read_content_items(
 @router.post("/", response_model=schemas.ContentItem, status_code=status.HTTP_201_CREATED)
 def create_content_item(
     content_item: schemas.ContentItemCreate,
-    client_id: int = Query(..., title="The ID of the client to associate with this content item"),
     current_user: Annotated[TokenData, Depends(get_current_user)],
+    client_id: int = Query(..., title="The ID of the client to associate with this content item"),
     db: Session = Depends(get_db)
 ):
     """新しいコンテンツアイテムを作成する"""
@@ -87,8 +87,8 @@ def create_content_item(
 
 @router.get("/{content_item_id}", response_model=schemas.ContentItem)
 def read_content_item(
-    content_item_id: int = Path(..., title="The ID of the content item to get"),
     current_user: Annotated[TokenData, Depends(get_current_user)],
+    content_item_id: int = Path(..., title="The ID of the content item to get"),
     db: Session = Depends(get_db)
 ):
     """指定したIDのコンテンツアイテム情報を取得する"""
@@ -116,8 +116,8 @@ def read_content_item(
 @router.put("/{content_item_id}", response_model=schemas.ContentItem)
 def update_content_item(
     content_item_update: schemas.ContentItemCreate,
-    content_item_id: int = Path(..., title="The ID of the content item to update"),
     current_user: Annotated[TokenData, Depends(get_current_user)],
+    content_item_id: int = Path(..., title="The ID of the content item to update"),
     db: Session = Depends(get_db)
 ):
     """コンテンツアイテム情報を更新する"""
@@ -157,8 +157,8 @@ def update_content_item(
 
 @router.delete("/{content_item_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_content_item(
-    content_item_id: int = Path(..., title="The ID of the content item to delete"),
     current_user: Annotated[TokenData, Depends(get_current_user)],
+    content_item_id: int = Path(..., title="The ID of the content item to delete"),
     db: Session = Depends(get_db)
 ):
     """コンテンツアイテムを削除する"""
