@@ -1,7 +1,7 @@
 # schemas.py
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from datetime import date, datetime
-from typing import Optional, List
+from typing import Optional, List, Literal
 
 # ユーザー作成用のリクエストボディモデル
 class UserCreate(BaseModel):
@@ -20,6 +20,9 @@ class UserUpdate(BaseModel):
     city: Optional[str] = None
     is_active: Optional[bool] = None
 
+# クライアントステータス - 新しいリテラル型
+ClientStatusType = Literal["to_do", "in_progress", "done"]
+
 # クライアント作成時のリクエストボディ用モデル
 class ClientCreate(BaseModel):
     name: str
@@ -27,7 +30,7 @@ class ClientCreate(BaseModel):
     business_category: str
     contact_email: Optional[str] = None
     contact_phone: Optional[str] = None
-    status: Optional[str] = None
+    status: Optional[ClientStatusType] = "to_do"  # デフォルト値を設定
     signed_date: Optional[date] = None
     estimated_monthly_revenue: Optional[float] = None  # decimal は float で扱う
 
@@ -48,6 +51,20 @@ class Client(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+# プロスペクトステータス - 新しいリテラル型
+ProspectStatusType = Literal[
+    "new_inquiry", 
+    "contact_attempted_phone", 
+    "contact_attempted_email", 
+    "contacted_no_response", 
+    "meeting_scheduled", 
+    "waiting_for_feedback", 
+    "follow_up_needed", 
+    "qualified", 
+    "converted", 
+    "disqualified"
+]
+
 # プロスペクト作成時のリクエストボディ用モデル
 class ProspectCreate(BaseModel):
     name: str
@@ -56,7 +73,7 @@ class ProspectCreate(BaseModel):
     contact_email: Optional[str] = None
     contact_phone: Optional[str] = None
     interest_level: Optional[str] = None
-    status: str
+    status: ProspectStatusType = "new_inquiry"  # デフォルト値を設定
     next_follow_up_date: Optional[date] = None
     notes: Optional[str] = None
 
