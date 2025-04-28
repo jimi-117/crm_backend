@@ -13,7 +13,6 @@ from src.config import settings
 
 # アプリケーション起動時にテーブルを作成する (開発・検証用)
 # 本番環境では Alembic などのマイグレーションツールを使うべき
-# if settings.ENV == "development":
 models.Base.metadata.create_all(bind=engine)
 
 # FastAPIアプリケーションを初期化
@@ -24,10 +23,18 @@ app = FastAPI(
 )
 
 # CORS設定
-allowed_origins = [
-    "https://crm-frontend-hazel-two.vercel.app/",  # 本番環境
-    "http://localhost:5173",  # ローカル開発環境
-]
+# カンマ区切りの文字列を配列に変換
+allowed_origins_str = settings.FRONTEND_ORIGINS
+allowed_origins = [origin.strip() for origin in allowed_origins_str.split(',')]
+
+# デバッグ用に許可されたオリジンを表示
+print(f"Allowed CORS origins: {allowed_origins}")
+
+# すべてのオリジンを許可するフォールバック（開発環境用）
+if settings.ENV != "production" and (not allowed_origins or len(allowed_origins) == 0):
+    allowed_origins = ["*"]
+    print("Warning: Using wildcard CORS origin in non-production environment")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
@@ -43,6 +50,11 @@ app.include_router(clients.router)
 app.include_router(prospects.router)
 app.include_router(content_items.router)
 
+# 開発環境の場合のみデバッグルーターを追加
+if settings.ENV != "production":
+    from src.routers import debug
+    app.include_router(debug.router)
+
 @app.get("/")
 async def root():
     return {"message": "Bienvenue sur l'API du CRM"}
@@ -50,4 +62,4 @@ async def root():
 @app.get("/health")
 async def health():
     """ヘルスチェックエンドポイント"""
-    return {"status": "ok"}
+    return {"status": "ok", "environment": settings.ENV, "cors_origins": allowed_origins}
