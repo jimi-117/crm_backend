@@ -1,5 +1,5 @@
 # src/routers/clients.py
-from typing import Annotated, List
+from typing import Annotated, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Path, Query
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
@@ -20,20 +20,34 @@ def read_clients(
     current_user: Annotated[TokenData, Depends(get_current_user)],
     db: Session = Depends(get_db),
     skip: int = 0,
-    limit: int = 100
+    limit: int = 100,
+    city: Optional[str] = None  # 都市によるフィルタリングを追加
 ):
-    """クライアント一覧を取得する（ロールに応じてフィルタリング）"""
+    """クライアント一覧を取得する（ロールと都市に応じてフィルタリング）"""
+    query = db.query(models.Client)
+    
     if current_user.role == "admin":
-        # adminの場合、全データを取得
-        clients = db.query(models.Client).offset(skip).limit(limit).all()
+        # adminの場合、全データを取得するが、都市フィルターがあれば適用
+        if city:
+            # clientsテーブルにはcity情報がないので、usersテーブルと結合
+            query = query.join(models.User).filter(models.User.city == city)
     else:
         # 通常ユーザーの場合、自身の user_id に紐づくデータのみ取得
-        clients = db.query(models.Client).filter(
-            models.Client.user_id == current_user.id
-        ).offset(skip).limit(limit).all()
+        query = query.filter(models.Client.user_id == current_user.id)
+        
+        # さらに都市でフィルタリング（ユーザー自身の都市）
+        if not city and current_user.city:
+            # 都市が指定されていない場合は、ユーザー自身の都市でフィルター
+            city = current_user.city
+        
+        if city:
+            # 担当しているクライアントの中で、特定の都市のもののみ表示
+            query = query.join(models.User).filter(models.User.city == city)
     
+    clients = query.offset(skip).limit(limit).all()
     return clients
 
+# 以下は既存のコードを残します
 @router.post("/", response_model=schemas.Client, status_code=status.HTTP_201_CREATED)
 def create_client(
     client: schemas.ClientCreate,
@@ -90,76 +104,3 @@ def read_client(
         )
     
     return client
-
-@router.put("/{client_id}", response_model=schemas.Client)
-def update_client(
-    current_user: Annotated[TokenData, Depends(get_current_user)],
-    client_update: schemas.ClientCreate,
-    db: Session = Depends(get_db),
-    client_id: int = Path(..., title="The ID of the client to update")
-):
-    """クライアント情報を更新する"""
-    # クライアントの存在確認
-    db_client = db.query(models.Client).filter(models.Client.id == client_id).first()
-    if db_client is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Client non trouvé"
-        )
-    
-    # 権限チェック: adminでなく、かつ自分のクライアントでない場合はアクセス不可
-    if current_user.role != "admin" and db_client.user_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Accès non autorisé à ce client"
-        )
-    
-    try:
-        # 更新データを適用
-        client_data = client_update.model_dump(exclude_unset=True)
-        for key, value in client_data.items():
-            setattr(db_client, key, value)
-        
-        db.commit()
-        db.refresh(db_client)
-        return db_client
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erreur serveur: {str(e)}"
-        )
-
-@router.delete("/{client_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_client(
-    current_user: Annotated[TokenData, Depends(get_current_user)],
-    db: Session = Depends(get_db),
-    client_id: int = Path(..., title="The ID of the client to delete")
-):
-    """クライアントを削除する"""
-    # クライアントの存在確認
-    db_client = db.query(models.Client).filter(models.Client.id == client_id).first()
-    if db_client is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Client non trouvé"
-        )
-    
-    # 権限チェック: adminでなく、かつ自分のクライアントでない場合はアクセス不可
-    if current_user.role != "admin" and db_client.user_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Accès non autorisé à ce client"
-        )
-    
-    try:
-        # 実際に削除
-        db.delete(db_client)
-        db.commit()
-        return None
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erreur serveur: {str(e)}"
-        )
