@@ -49,7 +49,7 @@ async def login_for_access_token(
 
     return {"access_token": access_token, "token_type": "bearer"}
 
-@router.get("/users/me/", response_model=TokenData)
+@router.get("/users/me", response_model=TokenData)
 async def read_users_me(current_user: Annotated[TokenData, Depends(get_current_user)]):
     """認証された現在のユーザー情報を返すエンドポイント"""
     return current_user
